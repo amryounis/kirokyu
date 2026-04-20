@@ -187,6 +187,7 @@ User-configurable options:
 - **Date format** — MM/DD/YYYY, DD/MM/YYYY, YYYY-MM-DD, etc.
 - **Reminder sound** — on / off, sound selection
 - **Recurring task default** — when a new recurring task is created, default pattern (none, daily, weekly, monthly)
+- **Language / locale** — UI language and right-to-left (RTL) layout support deferred to Phase 5. Data storage is Unicode (UTF-8) throughout and supports any language for content entry today.
 
 ---
 
