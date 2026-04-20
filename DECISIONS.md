@@ -118,4 +118,64 @@ When a decision is revisited or reversed, the original entry is preserved and th
 
 ---
 
-*Last updated: April 19, 2026 (Phase 0, Session 2).*
+## 12. Project goals and priority order
+
+**Context.** Kirokyu started as a pure learning vehicle. Over time, with a change in work situation (career transition, freelancing pursuit, family-venture thinking), the goal mix shifted. Clarifying the actual priority order prevents the project from optimizing for the wrong thing.
+
+**Decision.** Four goals, in priority order: (1) commercial pivot-readiness — the architecture must support swapping the domain for something with business weight; (2) training and skill acquisition — deliberate practice of hexagonal architecture, Python craft, and the broader toolset; (3) personal daily use — Kirokyu should be genuinely usable as a task tracker by the author; (4) interview and portfolio evidence — a positive but minor goal, not a driver of decisions.
+
+**Consequences.** Architectural discipline takes precedence over speed. Domain portability matters more than domain richness — the task domain is a placeholder that teaches the pattern; the skeleton is what survives a pivot. Features are evaluated against "would I actually use this" rather than "would this impress a reviewer." Timeline is loose — quality over calendar. The project will not be rushed to produce a portfolio artifact on a hiring timeline.
+
+---
+
+## 13. Working style: collaborative and adaptive, not directive
+
+**Context.** Early sessions revealed a mismatch between working styles. Claude defaulted to over-specifying requirements upfront — exhaustive pre-flight questions, ranked priorities, calibration matrices — before allowing work to begin. This drained energy and created friction inconsistent with the author's twenty-plus years of delivery experience, where requirements evolve, ambiguity is the norm, and over-specifying upfront actively harms the work.
+
+**Decision.** Work collaboratively and adaptively. Start with working assumptions rather than locked decisions. Write code first, reflect after. Raise questions one at a time when something is genuinely load-bearing. Write DECISIONS.md entries when decisions are actually made, not before. Accept that some things will be revisited as reality pushes back — that is not failure, it is how real projects work.
+
+**Consequences.** The project moves faster and feels less like a requirements workshop. Some decisions will be made implicitly and recorded later. DECISIONS.md stays honest — it captures what was actually decided, not what was speculatively pre-decided. If something feels wrong when it's built, it gets changed without ceremony.
+
+---
+
+## 14. Internal package layout: layered (domain / application / adapters)
+
+**Context.** Python hexagonal projects can be structured in two common ways: layered (top-level subpackages by architectural concern: `domain/`, `application/`, `adapters/`) or feature-sliced (top-level subpackages by domain concept: `tasks/`, each containing its own layers). Layered is more textbook and makes the hexagon boundaries loud; feature-sliced scales better for large, multi-domain systems.
+
+**Decision.** Use the layered layout inside `src/kirokyu/`: `domain/` for entities and value objects, `application/` for use cases, ports, and DTOs, `adapters/` for concrete implementations. Ports (interface definitions) live inside `application/` because the application layer is what declares what it needs — adapters plug in from the outside.
+
+**Consequences.** The architectural boundaries are immediately visible from the directory structure. A reviewer scanning the repo sees "domain depends on nothing, application depends on domain, adapters depend on both" without reading a line of code. Feature-sliced would scale better if the domain grew to dozens of concepts, but Kirokyu's domain is deliberately small — the layered layout is appropriate and more pedagogically clear for this project's purpose.
+
+---
+
+## 15. Value object implementation: frozen dataclasses for domain, Pydantic for DTOs
+
+**Context.** Domain value objects (TaskId, Priority, DueDate) could be implemented as either frozen dataclasses (stdlib) or Pydantic models (third-party). Pydantic-everywhere is common in real-world Python codebases for consistency; frozen dataclasses are more architecturally pure but require manual validation.
+
+**Decision.** Use `@dataclass(frozen=True)` for domain value objects. Use Pydantic `BaseModel` exclusively for DTOs at the use-case boundary (input/output models). The domain layer imports nothing from Pydantic — it depends only on the Python standard library.
+
+**Consequences.** `grep -r "^import\|^from" src/kirokyu/domain/` shows only stdlib imports — a visible signal of architectural discipline. Domain value objects carry identity semantics and immutability without the runtime validation overhead of Pydantic. DTOs do validation at the boundary, which is their job. The distinction between "inert domain value" and "boundary validator" is made concrete in the code. Migrating domain objects to Pydantic later, if needed, is mechanical.
+
+---
+
+## 16. Domain identity and time: IdProvider and Clock ports
+
+**Context.** Use cases that create entities need to generate IDs and timestamps. The naive approach is to call `uuid.uuid4()` and `datetime.now()` directly inside use cases. This couples the use cases to real-world time and random ID generation, making them non-deterministic and harder to test (tests can't control what IDs or timestamps get produced).
+
+**Decision.** Introduce two small ports: `IdProvider` (returns a new `TaskId`) and `Clock` (returns the current datetime). Both are defined as abstract interfaces in `application/ports/`. The in-memory adapter provides simple implementations (uuid4, datetime.now). Tests inject predictable implementations (sequential IDs, fixed timestamps) without mocking.
+
+**Consequences.** Use cases remain pure functions of their inputs — same inputs always produce same outputs when the same providers are injected. Tests are deterministic and readable. The ports are small (one method each) — the ceremony cost is low. This is exactly the kind of detail that distinguishes a candidate who understands the pattern from one who has read about it.
+
+---
+
+## 17. Task status model: TaskStatus enum with three states
+
+**Context.** Tasks need a status. The simplest approach is a boolean `is_completed`. A richer approach uses an enum, which is extensible without a breaking change if new states are needed later.
+
+**Decision.** Use a `TaskStatus` enum with three members: `PENDING`, `COMPLETED`, `ARCHIVED`. Deleted tasks are handled by permanent removal from the repository rather than a `DELETED` status — a deleted task does not exist, so it should not be represented. Un-completion (toggling a task back to `PENDING`) is supported. Archiving is reversible (archived → pending). Deletion is permanent.
+
+**Consequences.** The three-state model covers the full lifecycle established in the product definition without over-engineering. Using an enum (rather than a boolean) means adding `IN_PROGRESS` or `CANCELLED` later is additive — no existing code breaks, no database migration for the boolean column. The decision to handle deletion as removal (not a status) keeps the repository contract clean: a repository query never returns deleted tasks because deleted tasks are not in the repository.
+
+---
+
+*Last updated: April 20, 2026 (Phase 0 wrap-up / Phase 1 prelude).*
