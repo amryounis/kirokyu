@@ -25,14 +25,16 @@ repos:
         args: ["--fix"]
       - id: ruff-format
 
-  # ---- Mypy: type checking ----
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.13.0
+# ---- Mypy: type checking ----
+  - repo: local
     hooks:
       - id: mypy
-        additional_dependencies: []
-        args: ["--config-file=pyproject.toml"]
-        files: ^src/
+        name: mypy
+        entry: mypy
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
 
   # ---- Pytest: run tests locally ----
   - repo: local

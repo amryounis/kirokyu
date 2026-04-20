@@ -99,3 +99,4 @@ ipython_config.py
 scratch/
 tmp/
 *.tmp
+*.zip
