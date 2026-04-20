@@ -32,6 +32,24 @@ if [ ! -d "$WINDOWS_DESKTOP" ]; then
     exit 1
 fi
 
+# Check for uncommitted changes
+echo -e "${BLUE}Checking git status...${NC}"
+cd "$PROJECT_DIR"
+if [ -n "$(git status --porcelain)" ]; then
+    echo -e "${RED}Warning: You have uncommitted changes:${NC}"
+    git status --short
+    echo ""
+    read -p "Continue anyway? (y/N): " CONFIRM
+    if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
+        echo "Checkpoint aborted. Commit your changes first."
+        exit 1
+    fi
+    echo ""
+else
+    echo -e "${GREEN}✓ Working tree is clean${NC}"
+    echo ""
+fi
+
 echo -e "${BLUE}Creating checkpoint for Kirokyu...${NC}"
 echo "Project directory: $PROJECT_DIR"
 echo "Output zip: $ZIP_PATH"
