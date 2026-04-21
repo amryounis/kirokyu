@@ -25,6 +25,7 @@ dependencies = [
     "typer>=0.12",
     "fastapi>=0.111",
     "uvicorn[standard]>=0.30",
+    "streamlit>=1.35",
 ]
 
 [project.scripts]
