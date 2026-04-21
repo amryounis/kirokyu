@@ -8,6 +8,7 @@ from kirokyu.application.dtos import CreateTaskInput, UpdateTaskInput
 from kirokyu.bootstrap import UseCases, build_use_cases
 from kirokyu.domain.exceptions import TaskNotFoundError
 from kirokyu.domain.value_objects import Priority
+from kirokyu.workspaces.registry import WorkspaceRegistry
 
 app = typer.Typer(
     name="kirokyu",
@@ -18,13 +19,29 @@ task_app = typer.Typer(help="Manage tasks.", no_args_is_help=True)
 app.add_typer(task_app, name="task")
 
 _use_cases: UseCases | None = None
+_workspace_name: str | None = None
 
 
 def _uc() -> UseCases:
     global _use_cases
     if _use_cases is None:
-        _use_cases = build_use_cases()
+        _use_cases = build_use_cases(workspace=_workspace_name)
     return _use_cases
+
+
+@app.callback()
+def main(
+    workspace: str | None = typer.Option(
+        None,
+        "--workspace",
+        "-w",
+        envvar="KIROKYU_WORKSPACE",
+        help="Workspace name. Falls back to KIROKYU_WORKSPACE env var.",
+    ),
+) -> None:
+    """Kirokyu — personal task manager."""
+    global _workspace_name
+    _workspace_name = workspace
 
 
 @task_app.command("create")
@@ -175,6 +192,74 @@ def delete_task(
         _uc().delete_task.execute(task_id)
         typer.echo("Deleted.")
     except TaskNotFoundError as e:
+        typer.echo(str(e), err=True)
+        raise typer.Exit(1) from e
+
+
+# ---------------------------------------------------------------------------
+# Workspace commands
+# ---------------------------------------------------------------------------
+
+workspace_app = typer.Typer(help="Manage workspaces.", no_args_is_help=True)
+app.add_typer(workspace_app, name="workspace")
+
+
+@workspace_app.command("create")
+def workspace_create(
+    name: str = typer.Argument(..., help="Workspace name (letters, digits, hyphens, underscores)."),
+) -> None:
+    """Create a new workspace."""
+    try:
+        registry = WorkspaceRegistry()
+        ws = registry.create(name)
+        typer.echo(f"Created workspace '{ws.name}'")
+        typer.echo(f"  db: {ws.db_path}")
+    except ValueError as e:
+        typer.echo(str(e), err=True)
+        raise typer.Exit(1) from e
+
+
+@workspace_app.command("list")
+def workspace_list() -> None:
+    """List all workspaces."""
+    registry = WorkspaceRegistry()
+    workspaces = registry.list_all()
+    if not workspaces:
+        typer.echo("No workspaces found. Create one with: kirokyu workspace create <name>")
+        return
+    for ws in workspaces:
+        last = ws.last_opened_at.strftime("%Y-%m-%d %H:%M") if ws.last_opened_at else "never"
+        typer.echo(f"  {ws.name:20}  last opened: {last}")
+
+
+@workspace_app.command("delete")
+def workspace_delete(
+    name: str = typer.Argument(..., help="Workspace name to delete."),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt."),
+    remove_db: bool = typer.Option(False, "--remove-db", help="Also delete the SQLite file."),
+) -> None:
+    """Remove a workspace from the registry."""
+    try:
+        registry = WorkspaceRegistry()
+        ws = registry.get(name)
+        if ws is None:
+            typer.echo(f"Workspace {name!r} not found.", err=True)
+            raise typer.Exit(1)
+        if not yes:
+            typer.confirm(
+                f"Remove workspace '{name}' from registry?",
+                abort=True,
+            )
+        registry.delete(name)
+        typer.echo(f"Removed workspace '{name}' from registry.")
+        if remove_db:
+            from pathlib import Path
+
+            db = Path(ws.db_path)
+            if db.exists():
+                db.unlink()
+                typer.echo(f"Deleted database file: {ws.db_path}")
+    except ValueError as e:
         typer.echo(str(e), err=True)
         raise typer.Exit(1) from e
 

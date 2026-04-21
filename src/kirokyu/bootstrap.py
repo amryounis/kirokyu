@@ -30,6 +30,7 @@ from kirokyu.application.use_cases.mutate_tasks import (
     UpdateTask,
 )
 from kirokyu.application.use_cases.query_tasks import DeleteTask, GetTask, ListTasks
+from kirokyu.workspaces.registry import WorkspaceRegistry
 
 ADAPTER_ENV = "KIROKYU_ADAPTER"
 DB_PATH_ENV = "KIROKYU_DB_PATH"
@@ -56,11 +57,28 @@ class UseCases:
 def build_use_cases(
     adapter: str | None = None,
     db_path: str | Path | None = None,
+    workspace: str | None = None,
 ) -> UseCases:
     """Construct and return all use cases wired to the selected adapter."""
     resolved_adapter = adapter or os.environ.get(ADAPTER_ENV, "sqlite")
-    repository = _build_repository(resolved_adapter, db_path)
+    resolved_db_path = _resolve_db_path(workspace, db_path)
+    repository = _build_repository(resolved_adapter, resolved_db_path)
     return _wire(repository)
+
+
+def _resolve_db_path(
+    workspace: str | None,
+    db_path: str | Path | None,
+) -> str | Path | None:
+    """Resolve the db path from a workspace name or a direct path."""
+    if workspace is None:
+        return db_path
+    registry = WorkspaceRegistry()
+    ws = registry.get(workspace)
+    if ws is None:
+        raise ValueError(f"Workspace {workspace!r} not found in registry.")
+    registry.touch(workspace)
+    return ws.db_path
 
 
 def _build_repository(adapter: str, db_path: str | Path | None) -> TaskRepository:
