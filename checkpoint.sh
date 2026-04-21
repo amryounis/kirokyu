@@ -8,7 +8,7 @@ set -e
 
 # Configuration
 PROJECT_DIR="$HOME/projects/kirokyu"
-WINDOWS_DESKTOP="/mnt/c/Users/Homer/Desktop"  # ← CHANGE "Homer" to your Windows username
+WINDOWS_DESKTOP="/mnt/c/Users/Homer/Desktop/py/kirokyu_project"  # ← CHANGE "Homer" to your Windows username
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 ZIP_NAME="kirokyu_${TIMESTAMP}.zip"
 ZIP_PATH="$PROJECT_DIR/${ZIP_NAME}"
