@@ -100,3 +100,4 @@ scratch/
 tmp/
 *.tmp
 *.zip
+*.Identifier
