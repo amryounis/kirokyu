@@ -13,7 +13,7 @@ import os
 
 import streamlit as st
 
-from kirokyu.adapters.ui.pages import task_detail, task_list, workspace
+from kirokyu.adapters.ui.pages import analytics, task_detail, task_list, workspace
 
 st.set_page_config(
     page_title="Kirokyu",
@@ -45,6 +45,26 @@ if st.session_state.workspace is None:
         st.session_state.page = "task_list"
 
 # ---------------------------------------------------------------------------
+# Sidebar navigation (only when workspace is active)
+# ---------------------------------------------------------------------------
+
+if st.session_state.workspace:
+    with st.sidebar:
+        st.markdown(f"**Workspace:** {st.session_state.workspace}")
+        st.divider()
+        if st.button("📋 Tasks", use_container_width=True):
+            st.session_state.page = "task_list"
+            st.rerun()
+        if st.button("📊 Analytics", use_container_width=True):
+            st.session_state.page = "analytics"
+            st.rerun()
+        st.divider()
+        if st.button("⇄ Switch workspace", use_container_width=True):
+            st.session_state.workspace = None
+            st.session_state.page = "workspace"
+            st.rerun()
+
+# ---------------------------------------------------------------------------
 # Page routing
 # ---------------------------------------------------------------------------
 
@@ -58,6 +78,8 @@ match st.session_state.page:
         task_list.show()
     case "task_detail":
         task_detail.show()
+    case "analytics":
+        analytics.show()
     case _:
         st.session_state.page = "workspace"
         st.rerun()
