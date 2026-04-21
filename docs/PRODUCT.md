@@ -1,8 +1,8 @@
 # Kirokyu — Product Definition
 
-**Status:** Product scope finalized. Ready for Phase 1 domain design.
+**Status:** Living document — updated as decisions are made.
 
-**Last updated:** April 19, 2026
+**Last updated:** April 21, 2026
 
 ---
 
@@ -187,7 +187,27 @@ User-configurable options:
 - **Date format** — MM/DD/YYYY, DD/MM/YYYY, YYYY-MM-DD, etc.
 - **Reminder sound** — on / off, sound selection
 - **Recurring task default** — when a new recurring task is created, default pattern (none, daily, weekly, monthly)
-- **Language / locale** — UI language and right-to-left (RTL) layout support deferred to Phase 5. Data storage is Unicode (UTF-8) throughout and supports any language for content entry today.
+- **Language / locale** — English is the default UI language. Arabic is the first additional language, with full RTL layout support tied to language selection. RTL layout without a translated UI is meaningless — the two are implemented together. Additional languages (e.g. French, German, Hebrew) can be contributed by the community by dropping in a new language file; no code changes are required. Data storage is Unicode (UTF-8) throughout and supports any language for content entry today. i18n architecture is built in from Phase 4 onwards.
+
+---
+
+## Workspaces
+
+A workspace is an isolated data silo — its own SQLite database file, its own tasks, completely separate from other workspaces. The user switches between workspaces explicitly.
+
+Each workspace has:
+- Name (required, used as the SQLite filename)
+- Created at
+- Last opened at
+
+Workspace metadata is stored in a registry file at `~/.kirokyu/workspaces.json`. Each workspace's tasks live in a corresponding SQLite file at `~/.kirokyu/workspaces/<name>.db`.
+
+**Workspace lifecycle:**
+- On first launch, the app has no active workspace — the user must create or open one before any task actions are available
+- The user can create a new workspace, open an existing one from the registry, or delete a workspace (with confirmation)
+- Closing a workspace returns the user to the workspace selection screen
+
+**Design rationale:** workspaces allow a single Kirokyu installation to serve multiple independent contexts (personal, work, side project) without data mixing. The hexagonal core is unaware of workspaces — the bootstrap selects the correct SQLite file before constructing use cases.
 
 ---
 
