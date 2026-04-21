@@ -38,11 +38,15 @@ if "selected_task_id" not in st.session_state:
 # Environment variable override
 # ---------------------------------------------------------------------------
 
-if st.session_state.workspace is None:
+if "env_loaded" not in st.session_state:
+    st.session_state.env_loaded = False
+
+if not st.session_state.env_loaded:
     env_workspace = os.environ.get("KIROKYU_WORKSPACE")
     if env_workspace:
         st.session_state.workspace = env_workspace
         st.session_state.page = "task_list"
+    st.session_state.env_loaded = True
 
 # ---------------------------------------------------------------------------
 # Sidebar navigation (only when workspace is active)
