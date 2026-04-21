@@ -2,7 +2,7 @@
 
 Production adapters:
     UuidIdProvider  — generates random UUID v4 TaskIds
-    SystemClock     — returns datetime.utcnow()
+    SystemClock     — returns current UTC datetime (timezone-naive)
 
 Test adapters:
     SequentialIdProvider  — deterministic ids for tests
@@ -12,7 +12,7 @@ Test adapters:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from kirokyu.application.ports.providers import Clock, IdProvider
 from kirokyu.domain.value_objects import TaskId
@@ -29,7 +29,7 @@ class SystemClock(Clock):
     """Returns the current UTC datetime (timezone-naive)."""
 
     def now(self) -> datetime:
-        return datetime.utcnow()
+        return datetime.now(UTC).replace(tzinfo=None)
 
 
 class SequentialIdProvider(IdProvider):

@@ -178,4 +178,34 @@ When a decision is revisited or reversed, the original entry is preserved and th
 
 ---
 
-*Last updated: April 20, 2026 (Phase 0 wrap-up / Phase 1 prelude).*
+---
+
+## 18. CLI framework: Typer
+
+**Context.** The CLI driving adapter needs a framework for argument parsing, help generation, and command grouping.
+
+**Decision.** Use Typer. Commands are defined as plain Python functions with type-annotated parameters; Typer derives argument names, types, and help text from those annotations automatically.
+
+**Consequences.** CLI commands read like normal Python functions. Type annotations do double duty: mypy checks them, Typer reads them. `CliRunner` from Typer's test utilities allows testing CLI commands without spawning subprocesses. The entry point is declared in `pyproject.toml` under `[project.scripts]`, so `pip install -e .` makes the `kirokyu` command available in the venv.
+
+---
+
+## 19. REST API framework: FastAPI
+
+**Context.** The REST API driving adapter needs an HTTP framework.
+
+**Decision.** Use FastAPI. The deciding factors: (1) we already use Pydantic v2 for DTOs — FastAPI reads those same models for request validation and response serialization at no extra cost; (2) FastAPI generates interactive OpenAPI documentation at `/docs` automatically from type annotations; (3) FastAPI is the current industry standard for new Python APIs.
+
+**Consequences.** The `CreateTaskInput` and `TaskOutput` DTOs from Phase 1 plug directly into FastAPI route signatures. Validation failures return 422 automatically. `TestClient` from `httpx` allows testing routes without a running server. The hexagonal core is unaware of FastAPI — nothing in the domain or application layer imports it.
+
+---
+
+## 20. Composition root: bootstrap module with UseCases dataclass
+
+**Context.** Both the CLI and the REST API need to construct the same set of use cases wired to a repository adapter and infrastructure providers. Without a central wiring point, that construction logic would be duplicated.
+
+**Decision.** Introduce `src/kirokyu/bootstrap.py` as the composition root. It exports a `UseCases` dataclass and a `build_use_cases()` factory that reads configuration from environment variables, instantiates the selected adapter, and returns a fully wired bundle. The CLI and API call `build_use_cases()` once at startup and never import adapter classes themselves.
+
+**Consequences.** The bootstrap is the only file that imports both application-layer and adapter-layer types simultaneously — intentional and contained. Adapter selection lives in exactly one place. Tests override the bundle directly without touching environment variables or the filesystem.
+
+*Last updated: April 21, 2026 (Phase 3 — CLI and REST API driving adapters).*
