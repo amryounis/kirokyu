@@ -83,11 +83,12 @@ def test_list_returns_all(registry: WorkspaceRegistry):
     assert "work" in names
 
 
-def test_list_sorted_by_name(registry: WorkspaceRegistry):
+def test_list_sorted_by_most_recently_used(registry: WorkspaceRegistry):
     registry.create("work")
     registry.create("personal")
+    registry.touch("work")
     names = [ws.name for ws in registry.list_all()]
-    assert names == sorted(names)
+    assert names[0] == "work"
 
 
 # ---------------------------------------------------------------------------

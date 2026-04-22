@@ -70,11 +70,18 @@ def show() -> None:
         try:
             import plotly.graph_objects as go
 
+            priority_colors = {
+                "high": "#F44336",
+                "medium": "#FF9800",
+                "low": "#4CAF50",
+            }
             fig = go.Figure(
                 go.Bar(
                     x=[p.priority for p in priority_data],
                     y=[p.count for p in priority_data],
-                    marker_color=["#4CAF50", "#FF9800", "#F44336"],
+                    marker_color=[
+                        priority_colors.get(p.priority, "#888888") for p in priority_data
+                    ],
                 )
             )
             fig.update_layout(

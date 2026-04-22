@@ -55,11 +55,12 @@ class WorkspaceRegistry:
         return workspace
 
     def list_all(self) -> list[Workspace]:
-        """Return all registered workspaces, sorted by name."""
+        """Return all registered workspaces, most recently used first."""
         workspaces = self._load()
         return sorted(
             [_to_workspace(w) for w in workspaces.values()],
-            key=lambda w: w.name,
+            key=lambda w: w.last_opened_at or w.created_at,
+            reverse=True,
         )
 
     def get(self, name: str) -> Workspace | None:
