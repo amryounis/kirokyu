@@ -60,8 +60,7 @@ class AnalyticsQueries:
         with self._conn() as conn:
             if since:
                 rows = conn.execute(
-                    "SELECT status, COUNT(*) as n FROM tasks "
-                    "WHERE created_at >= ? GROUP BY status",
+                    "SELECT status, COUNT(*) as n FROM tasks WHERE created_at >= ? GROUP BY status",
                     (since.isoformat(),),
                 ).fetchall()
             else:
