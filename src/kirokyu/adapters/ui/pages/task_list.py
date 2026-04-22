@@ -20,7 +20,7 @@ def show() -> None:
     workspace = st.session_state.workspace
     st.title(f"Kirokyu — {workspace}")
 
-    col1, col2 = st.columns([6, 1])
+    _, col2 = st.columns([6, 1])
     with col2:
         if st.button("Switch workspace"):
             st.session_state.workspace = None
