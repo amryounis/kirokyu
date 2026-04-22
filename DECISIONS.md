@@ -209,3 +209,15 @@ When a decision is revisited or reversed, the original entry is preserved and th
 **Consequences.** The bootstrap is the only file that imports both application-layer and adapter-layer types simultaneously — intentional and contained. Adapter selection lives in exactly one place. Tests override the bundle directly without touching environment variables or the filesystem.
 
 *Last updated: April 21, 2026 (Phase 3 — CLI and REST API driving adapters).*
+
+---
+
+## 21. GitHub migration and CI: Phase 6
+
+**Context.** The project plan deferred GitHub migration to Phase 6. Local git history was maintained from day one (Decision 10), making migration a single push operation.
+
+**Decision.** Migrate to GitHub at `https://github.com/amryounis/kirokyu`. Add GitHub Actions CI workflow running ruff lint, ruff format check, mypy, and pytest on every push to main. Defer Dockerfile — not justified for a local-first personal app at this stage.
+
+**Consequences.** The full git history from Phase 0 is preserved on GitHub. CI enforces the same quality gates as local pre-commit on every push, catching issues that pre-commit auto-fixes locally but would otherwise be invisible in CI. Dockerfile deferred to a future phase when deployment or distribution needs arise.
+
+*Last updated: April 22, 2026 (Phase 6 — Production polish).*
