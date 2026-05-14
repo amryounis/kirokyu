@@ -93,8 +93,8 @@ Requires Python 3.12 or newer.
 
 Requires Python 3.12 or newer.
 
-```bash
-git clone [Kirokyu Repository](https://github.com/amryounis/kirokyu.git)
+git clone https://github.com/amryounis/kirokyu.git
+
 cd kirokyu
 
 python3 -m venv .venv
@@ -102,7 +102,7 @@ source .venv/bin/activate
 
 pip install -e ".[dev]"
 pre-commit install
-```
+
 ---
 
 ## Development
