@@ -64,18 +64,18 @@ kirokyu workspace list
 └────────────────────┬────────────────────────┘
                      │
 ┌────────────────────▼────────────────────────┐
-│            Application Layer               │
-│   Use Cases │ DTOs │ Ports (interfaces)    │
+│            Application Layer                │
+│   Use Cases │ DTOs │ Ports (interfaces)     │
 └────────────────────┬────────────────────────┘
                      │
 ┌────────────────────▼────────────────────────┐
-│              Domain Layer                  │
-│   Task entity │ Value objects │ Exceptions │
+│              Domain Layer                   │
+│   Task entity │ Value objects │ Exceptions  │
 └────────────────────┬────────────────────────┘
                      │
 ┌────────────────────▼────────────────────────┐
-│            Driven Adapters                 │
-│   SQLite │ JSON file │ In-memory           │
+│            Driven Adapters                  │
+│   SQLite │ JSON file │ In-memory            │
 └─────────────────────────────────────────────┘
 ```
 
@@ -90,7 +90,7 @@ For the full architectural rationale see [`ARCHITECTURE.md`](ARCHITECTURE.md) an
 Requires Python 3.12 or newer.
 
 ```bash
-git clone <repository-url> kirokyu
+git git clone https://github.com/amryounis/kirokyu.git
 cd kirokyu
 
 python3 -m venv .venv
