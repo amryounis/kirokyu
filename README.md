@@ -81,7 +81,7 @@ kirokyu workspace list
 
 The domain and application layers have zero infrastructure imports. The adapter selection is made once, at the bootstrap layer, and injected into the use cases.
 
-For the full architectural rationale see [`ARCHITECTURE.md`](ARCHITECTURE.md) and [`DECISIONS.md`](DECISIONS.md).
+For the full architectural rationale see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ---
 
