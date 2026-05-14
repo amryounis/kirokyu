@@ -90,7 +90,7 @@ For the full architectural rationale see [`docs/ARCHITECTURE.md`](docs/ARCHITECT
 Requires Python 3.12 or newer.
 
 ```bash
-git git clone https://github.com/amryounis/kirokyu.git
+git clone [`https://github.com/amryounis/kirokyu.git`](https://github.com/amryounis/kirokyu.git)
 cd kirokyu
 
 python3 -m venv .venv
