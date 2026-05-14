@@ -89,6 +89,10 @@ For the full architectural rationale see [`docs/ARCHITECTURE.md`](docs/ARCHITECT
 
 Requires Python 3.12 or newer.
 
+## Getting started
+
+Requires Python 3.12 or newer.
+
 ```bash
 git clone [https://github.com/amryounis/kirokyu.git](https://github.com/amryounis/kirokyu.git)
 cd kirokyu
@@ -98,7 +102,6 @@ source .venv/bin/activate
 
 pip install -e ".[dev]"
 pre-commit install
-```
 
 ---
 
